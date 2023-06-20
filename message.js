@@ -1,6 +1,5 @@
 const express = require('express');
 const axios = require('axios');
-const bodyParser = require('body-parser');
 const moment = require('moment');
 const { parseISO, format } = require('date-fns');
 const app = express();
@@ -166,7 +165,6 @@ app.get('/patients/:id', async (req, res) => {
                 };
                 break;
                 case 'NK1':
-                  //{emergencyContactName}|${relationship}|${emergencyContactAddress}|${emergencyContactPhone}`;
                   const emergencyContactName = fields [2];
                   const relationship = fields [3];
                   const emergencyContactAddress = fields [4];
