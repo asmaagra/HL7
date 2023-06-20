@@ -1,0 +1,135 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+model Patient{
+    id              Int @id @default(autoincrement())
+    ipp             String   @default(uuid()) @unique
+    firstName       String
+    lastName        String
+    phoneNumber     String?
+    cin             String
+    photo           String
+    communication   String
+    address         String
+    email           String?  @unique 
+    birthDate       DateTime
+    gender          String
+    deceasedBoolean Boolean?
+    deceasedDateTime DateTime? 
+    maritalStatus   String
+    emergencyContactName String 
+    emergencyContactPhone String 
+    emergencyContactAddress  String
+    relationship     String
+    patientClass    String
+    praticien       Rencontre[]
+    locations         Location[] 
+    appointments    Appointment[]
+    organisation    Organisation[]
+    device          Device[]
+}
+model Praticien{
+    id             Int @id @default(autoincrement())
+    role           String
+    firstName    String
+    lastName     String
+    phoneNumber  String?
+    email        String?      @unique
+    createdAt    DateTime     @default(now())
+    updatedAt    DateTime     @updatedAt
+    patients       Rencontre[]
+    appointments   Appointment[]
+    organisation   PraticienRole[]
+    careTeam       CareTeam    @relation(fields: [careTeamId], references: [id])
+    careTeamId     Int
+}
+model Rencontre {
+  id               Int        @id @default(autoincrement())
+  startDate        DateTime
+  EndDate          DateTime
+  description      String?
+  patient          Patient    @relation(fields: [patientId], references: [id])
+  patientId        Int
+  praticien        Praticien  @relation(fields: [praticienId], references: [id])
+  praticienId      Int
+}
+model Appointment{
+  id               Int          @id @default(autoincrement())
+  date             DateTime
+  status           String
+  description      String?
+  patient          Patient      @relation(fields: [patientId], references: [id])
+  patientId        Int
+  praticien       Praticien @relation(fields: [praticienId], references: [id])
+  praticienId      Int
+  location         Location?    @relation(fields: [locationId], references: [id])
+  locationId       Int
+}
+model Location {
+  id               Int     @id @default(autoincrement())
+  name             String
+  address          String
+  praticienRoles   PraticienRole[]  @relation("PraticienRoleToLocation")
+  appointments     Appointment[]
+  organisation     Organisation @relation(fields: [organisationId], references: [id])
+  organisationId   Int
+  healthcareservice    HealthcareService[]
+  patient          Patient[]
+}
+model Organisation {
+  id               Int            @id @default(autoincrement())
+  name             String
+  description      String
+  locations        Location[]
+  patients         Patient[]
+  praticiens       PraticienRole[]
+  device           Device[]
+  healthcareservice   HealthcareService[]
+}
+model PraticienRole {
+  id               Int             @id @default(autoincrement())
+  name             String
+  description      String?
+  specialty        String?
+  startDate        DateTime?
+  endDate          DateTime?
+  active           Boolean         @default(true)
+  praticien        Praticien       @relation(fields: [praticienId], references: [id])
+  praticienId      Int
+  locations        Location[]      @relation("PraticienRoleToLocation")
+  organisation     Organisation    @relation(fields: [organisationId], references: [id])
+  organisationId   Int
+}
+model Device {
+  id               Int               @id @default(autoincrement())
+  type             String?
+  manufacturer     String?
+  model            String?
+  patient          Patient?          @relation(fields: [patientId], references: [id])
+  patientId        Int?
+  organisation     Organisation?     @relation(fields: [organisationId], references: [id])
+  organisationId   Int?
+}
+model HealthcareService {
+  id               Int      @id @default(autoincrement())
+  name             String
+  description      String?
+  contact          String
+  location         Location @relation(fields: [locationId], references: [id])
+  locationId       Int
+  organization     Organisation @relation(fields: [organisationId], references: [id])
+  organisationId   Int
+  careTeams        CareTeam[]
+}
+model CareTeam {
+  id               Int      @id @default(autoincrement())
+  name             String
+  praticiens Praticien[]
+  healthCareService HealthcareService? @relation(fields: [healthCareServiceId], references: [id])
+  healthCareServiceId Int?
+}
+

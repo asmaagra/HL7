@@ -64,12 +64,14 @@ async function generateData() {
           address: faker.address.streetAddress(),
           email: faker.internet.email(),
           birthDate: faker.date.past(),
-          gender: faker.random.arrayElement(['H','F']),
+          gender: faker.random.arrayElement(['M','F']),
           deceasedBoolean: faker.datatype.boolean(),
           deceasedDateTime: faker.date.past(),
           maritalStatus: faker.random.arrayElement(['A','D', 'M', 'S', 'W']),
           emergencyContactName: faker.name.findName(),
           emergencyContactPhone: faker.phone.phoneNumber(),
+          emergencyContactAddress: faker.address.streetAddress(),
+          relationship : faker.random.arrayElement(['FTH', 'MTH', 'SON', 'DAU', 'SIS', 'BRO', 'SPO']),
           patientClass: faker.random.arrayElement(['I', 'O', 'E', 'R', 'B']),
         }
       });
@@ -261,7 +263,7 @@ app.get('/patients', async (req, res) => {
   });
   // Création
   app.post('/patients', async (req, res) => {
-    const { ipp, firstName, lastName, phoneNumber, cin, photo,  communication, address, email, birthDate, gender,deceasedBoolean, deceasedDateTime, maritalStatus, emergencyContactName, emergencyContactPhone } = req.body;
+    const { ipp, firstName, lastName, phoneNumber, cin, photo,  communication, address, email, birthDate, gender,deceasedBoolean, deceasedDateTime, maritalStatus, emergencyContactName, emergencyContactPhone, emergencyContactAddress, relationship } = req.body;
     try {
       const patient = await prisma.patient.create({
         data: {
@@ -280,7 +282,9 @@ app.get('/patients', async (req, res) => {
           deceasedDateTime, 
           maritalStatus, 
           emergencyContactName, 
-          emergencyContactPhone
+          emergencyContactPhone,
+          emergencyContactAddress,
+          relationship
         },
       });
       res.json(patient);
@@ -305,7 +309,7 @@ app.get('/patients', async (req, res) => {
   // Mise à jour
   app.put('/patients/:id', async (req, res) => {
     const { id } = req.params;
-    const {  ipp, firstName, lastName, phoneNumber, cin, photo,  communication, address, email, birthDate, gender,deceasedBoolean, deceasedDateTime, maritalStatus, emergencyContactName, emergencyContactPhone } = req.body;
+    const {  ipp, firstName, lastName, phoneNumber, cin, photo,  communication, address, email, birthDate, gender,deceasedBoolean, deceasedDateTime, maritalStatus, emergencyContactName, emergencyContactPhone, emergencyContactAddress, relationship } = req.body;
     try {
       const updatedPatient = await prisma.patient.update({
         where: { id: parseInt(id) },
@@ -325,7 +329,9 @@ app.get('/patients', async (req, res) => {
           deceasedDateTime, 
           maritalStatus, 
           emergencyContactName, 
-          emergencyContactPhone
+          emergencyContactPhone,
+          emergencyContactAddress,
+          relationship
         },
       });
       res.json(updatedPatient);
