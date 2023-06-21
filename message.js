@@ -1,9 +1,10 @@
 const express = require('express');
 const axios = require('axios');
+const cors = require ('cors');
 const moment = require('moment');
 const { parseISO, format } = require('date-fns');
 const app = express();
-
+app.use(cors());
 function getSequenceNumber() {
   const sequenceNumber = Math.floor(Math.random() * 1000000) + 1;
   return sequenceNumber.toString();
@@ -56,14 +57,10 @@ function convertirEnHL7(patientData, rencontreData, praticienData) {
     lastName,
     firstName,
     birthDate,
-    cin,
-    photo,
     communication,
     address,
-    email,
     phoneNumber,
     gender,
-    deceasedBoolean,
     deceasedDateTime,
     maritalStatus,
     emergencyContactName,
@@ -86,7 +83,6 @@ function convertirEnHL7(patientData, rencontreData, praticienData) {
   return hl7String;
 }
 
-
 // Récupération de données
 app.get('/patients/:id', async (req, res) => {
   const { id } = req.params;
@@ -101,16 +97,17 @@ app.get('/patients/:id', async (req, res) => {
 
       if (rencontreResponse.status === 200) {
         const rencontreData = rencontreResponse.data;
-
+       // console.log (patientData);
+       // console.log (rencontreData);
         const praticienId = rencontreData.praticienId;
         const praticienURL = `http://localhost:3000/praticiens/${praticienId}`;
         const praticienResponse = await axios.get(praticienURL);
 
         if (praticienResponse.status === 200) {
           const praticienData = praticienResponse.data;
-
+         // console.log (praticienData);
           const messageHL7 = convertirEnHL7(patientData, rencontreData, praticienData);
-          console.log (messageHL7);
+          //console.log (messageHL7);
           // Transformation du message hl7
           const segments = messageHL7.split('\n');
           const resultObj = {};
@@ -132,10 +129,10 @@ app.get('/patients/:id', async (req, res) => {
                 resultObj['MESSAGE HEADER'] = {
                   'App': app,
                   'Facility': facility,
-                  'Msg Time': msgTime,
-                  'Control ID': controlID,
-                  'Type': type,
-                  'Version': version
+                  'msgTime': msgTime,
+                  'controlID': controlID,
+                  'type': type,
+                  'version': version
                 };
                 break;
              
@@ -154,26 +151,27 @@ app.get('/patients/:id', async (req, res) => {
                 resultObj['PATIENT INFORMATION'] = {
                   'ID': id,
                   'Ipp': ipp,
-                  'FirstName': firstName,
-                  'LastName': lastName,
-                  'DOB': birthDate,
-                  'Gender': gender,
-                  'Address': address,
-                  'Phone': phoneNumber,
-                  'Communication': communication,
-                  'Marital Status': maritalStatus
+                  'firstName': firstName,
+                  'lastName': lastName,
+                  'birthDate': birthDate,
+                  'gender': gender,
+                  'address': address,
+                  'phoneNumber': phoneNumber,
+                  'communication': communication,
+                  'maritalStatus': maritalStatus
                 };
                 break;
                 case 'NK1':
+                 
                   const emergencyContactName = fields [2];
                   const relationship = fields [3];
                   const emergencyContactAddress = fields [4];
                   const emergencyContactPhone = fields [5];
                 resultObj['NEXT OF KIN'] = {
-                  'Name': emergencyContactName,
-                  'RelationShip': relationship,
-                  'Address': emergencyContactAddress,
-                  'Phone Number':emergencyContactPhone,
+                  'emergencyContactName': emergencyContactName,
+                  'relationShip': relationship,
+                  'emergencyContactAddress': emergencyContactAddress,
+                  'emergencyContactPhone ':emergencyContactPhone,
                 };
                 break;
                 case 'PV1':
@@ -185,12 +183,12 @@ app.get('/patients/:id', async (req, res) => {
                   const dischargeDate = moment(fields[45], 'YYYYMMDD').format('MMMM D, YYYY');
           
                   resultObj['VISIT INFORMATION'] = {
-                    'Patient Class': patientClass,
-                    'Practitioner ID': practitionerId,
-                    'Family Name': familyName,
-                    'Given Name': givenName,
-                    'Admit Date': admitDate,
-                    'Discharge Date': dischargeDate
+                    'PatientClass': patientClass,
+                    'PractitionerID': practitionerId,
+                    'familyName': familyName,
+                    'givenName': givenName,
+                    'admitDate': admitDate,
+                    'dischargeDate': dischargeDate
                   };
                   break;
           
@@ -199,10 +197,13 @@ app.get('/patients/:id', async (req, res) => {
           });
 
           const result = {
-            'Result': resultObj,
-          
+            'message HL7': 
+            messageHL7,
+            'Données Json': 
+            resultObj,
+        
           };
-
+         console.log(result)
           res.send(result);
         } else {
           res.status(404).json({ error: "Une erreur s'est produite lors de la récupération des données du praticien." });
