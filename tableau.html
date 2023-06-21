@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Tableau HL7</title>
+  <style>
+    table {
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid black;
+      padding: 8px;
+    }
+  </style>
+</head>
+<body>
+  <table id="hl7Table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Message HL7</th>
+        <th>Données JSON</th>
+      </tr>
+    </thead>
+    <tbody>
+    </tbody>
+  </table>
+
+  <script>
+    var tableData = [];
+// Ajout d'une nouvelle ligne
+    function ajouter(id, messageHL7, donneesJSON) {
+      var tableBody = document.querySelector('#hl7Table tbody');
+      var newRow = tableBody.insertRow();
+
+      var idCell = newRow.insertCell();
+      idCell.textContent = id;
+
+      var hl7Cell = newRow.insertCell();
+      hl7Cell.textContent = messageHL7;
+
+      var jsonCell = newRow.insertCell();
+      jsonCell.textContent = JSON.stringify(donneesJSON);
+
+      tableData.push({ id, messageHL7, donneesJSON });
+    }
+
+// Récupération de données
+    function donnees(id) {
+      var tableBody = document.querySelector('#hl7Table tbody');
+      tableBody.innerHTML = '';
+      tableData.forEach(data => {
+        ajouterLigne(data.id, data.messageHL7, data.donneesJSON);
+      });
+
+      fetch('http://localhost:4000/patients/' + id)
+        .then(response => response.json())
+        .then(data => {
+          var messageHL7 = data['message HL7'];
+          var donneesJSON = data['Données Json'];
+          ajouter(id, messageHL7, donneesJSON);
+        })
+        .catch(error => console.error('Erreur lors de la récupération des données du serveur:', error));
+    }
+
+    window.onload = function() {
+      for (var id = 1; id <= 30; id++) {
+        donnees(id);
+      }
+    };
+  </script>
+</body>
+</html>
