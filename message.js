@@ -1,3 +1,4 @@
+// Importation des modules
 const express = require('express');
 const axios = require('axios');
 const cors = require ('cors');
@@ -5,16 +6,19 @@ const moment = require('moment');
 const { parseISO, format } = require('date-fns');
 const app = express();
 app.use(cors());
+// focntion pour générer un numéro de séquence aléatoire
 function getSequenceNumber() {
   const sequenceNumber = Math.floor(Math.random() * 1000000) + 1;
   return sequenceNumber.toString();
 }
+// fonction pour avoir un controlId pour le message 
 function getMessageControlID() {
   const timestamp = new Date().getTime();
   const randomString = Math.random().toString(36).substr(2, 3);
   const messageControlID = `MSG${timestamp}${randomString}`;
   return messageControlID.substr(0, 20);
 }
+// fonction pour avoir la date au format HL7
 function getDateHL7() {
   const date = new Date();
   const year = date.getFullYear().toString();
@@ -26,11 +30,11 @@ function getDateHL7() {
 
   return `${year}${month}${day}${hours}${minutes}${seconds}`;
 }
-
+// fonction pour avoir une date pour l'événement
 function getEventDateTime() {
   return getDateHL7();
 }
-
+// fonction pour obtenir le segment pv1 (informations de la visite)
 function getPV1Segment(rencontreData, praticienData, patientData) {
   const { startDate, EndDate } = rencontreData;
   const { id , firstName, lastName } = praticienData;
@@ -43,7 +47,7 @@ function getPV1Segment(rencontreData, praticienData, patientData) {
 
   return pv1Segment;
 }
-
+// fonction pour convertir les dates au format HL7
 function convertToHL7DateFormat(dateString) {
   const parsedDate = parseISO(dateString);
   const formattedDate = format(parsedDate, 'yyyyMMdd');
