@@ -512,7 +512,7 @@ app.get('/appointments', async (req, res) => {
     }
   });
   
-  // Endpoint pour créer un nouveau rendez-vous
+  // Création
   app.post('/appointments', async (req, res) => {
     const { date, status, description, patientId, praticienId, locationId } = req.body;
     try {
@@ -547,7 +547,7 @@ app.get('/appointments', async (req, res) => {
     }
   });
   
-  // Endpoint pour mettre à jour un rendez-vous
+  // Mise à jour
   app.put('/appointments/:id', async (req, res) => {
     const { id } = req.params;
     const { date, status, description, patientId, praticienId, locationId } = req.body;
@@ -569,7 +569,7 @@ app.get('/appointments', async (req, res) => {
     }
   });
   
-  // Supprimer
+  // Suppression
   app.delete('/appointments/:id', async (req, res) => {
     const { id } = req.params;
     try {
